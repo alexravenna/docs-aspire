@@ -2,7 +2,7 @@
 title: .NET Aspire Apache Kafka component
 description: Learn how to use the .NET Aspire Apache Kafka client message-broker component.
 ms.topic: how-to
-ms.date: 06/05/2024
+ms.date: 07/17/2024
 ---
 
 # .NET Aspire Apache Kafka component
@@ -11,7 +11,7 @@ In this article, you learn how to use the .NET Aspire Apache Kafka client messag
 
 ## Get started
 
-To get started with the .NET Aspire Apache Kafka component, install the [Aspire.Confluent.Kafka](https://www.nuget.org/packages/Aspire.Confluent.Kafka) NuGet package.
+To get started with the .NET Aspire Apache Kafka component, install the [Aspire.Confluent.Kafka](https://www.nuget.org/packages/Aspire.Confluent.Kafka) NuGet package in the consuming client project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -49,7 +49,7 @@ internal sealed class MyWorker(IProducer<string, string> producer) : BackgroundS
 
 ## App host usage
 
-To model the Kafka resource in the app host, install the [Aspire.Hosting.Kafka](https://www.nuget.org/packages/Aspire.Hosting.Kafka) NuGet package.
+To model the Kafka resource in the app host, install the [Aspire.Hosting.Kafka](https://www.nuget.org/packages/Aspire.Hosting.Kafka) NuGet package in the [app host](xref:aspire/app-host) project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -71,13 +71,14 @@ In your app host project, register a Kafka container and consume the connection 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
 
-var messaging = builder.AddKafka("messaging");
+var messaging = builder.AddKafka("messaging")
+                       .WithKafkaUI();
 
 var myService = builder.AddProject<Projects.MyService>()
                        .WithReference(messaging);
 ```
 
-The `WithReference` method configures a connection in the `MyService` project named `messaging`. In the _:::no-loc text="Program.cs":::_ file of `MyService`, the Apache Kafka broker connection can be consumed using:
+The `WithKafkaUI()` extension method which provides a web-based interface to view the state of the Kafka container instance. The `WithReference` method configures a connection in the `MyService` project named `messaging`. In the _:::no-loc text="Program.cs":::_ file of `MyService`, the Apache Kafka broker connection can be consumed using:
 
 ```csharp
 builder.AddKafkaProducer<string, string>("messaging");

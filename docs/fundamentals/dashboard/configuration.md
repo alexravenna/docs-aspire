@@ -67,7 +67,8 @@ Alternatively, these same values could be configured using a JSON configuration 
 | Option | Default Value | Description |
 |--|--|--|
 | `ASPNETCORE_URLS` | `http://localhost:18888` | One or more HTTP endpoints through which the dashboard frontend is served. The frontend endpoint is used to view the dashboard in a browser. When the dashboard is launched by the .NET Aspire app host this address is secured with HTTPS. Securing the dashboard with HTTPS is recommended. |
-| `DOTNET_DASHBOARD_OTLP_ENDPOINT_URL` | `http://localhost:18889` | The OTLP endpoint. This endpoint hosts an OTLP service and receives telemetry. When the dashboard is launched by the .NET Aspire app host this address is secured with HTTPS. Securing the dashboard with HTTPS is recommended. |
+| `DOTNET_DASHBOARD_OTLP_ENDPOINT_URL` | `http://localhost:18889` | The [OTLP/gRPC](https://opentelemetry.io/docs/specs/otlp/#otlpgrpc) endpoint. This endpoint hosts an OTLP service and receives telemetry using gRPC. When the dashboard is launched by the .NET Aspire app host this address is secured with HTTPS. Securing the dashboard with HTTPS is recommended. |
+| `DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL` | `http://localhost:18890` | The [OTLP/HTTP](https://opentelemetry.io/docs/specs/otlp/#otlphttp) endpoint. This endpoint hosts an OTLP service and receives telemetry using Protobuf over HTTP. When the dashboard is launched by the .NET Aspire app host the OTLP/HTTP endpoint isn't configured by default. To configure an OTLP/HTTP endpoint with the app host, set an `DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL` env var value in `launchSettings.json`. Securing the dashboard with HTTPS is recommended. |
 | `DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS` | `false` | Configures the dashboard to not use authentication and accepts anonymous access. This setting is a shortcut to configuring `Dashboard:Frontend:AuthMode` and `Dashboard:Otlp:AuthMode` to `Unsecured`. |
 | `DOTNET_DASHBOARD_CONFIG_FILE_PATH` | `null` | The path for a JSON configuration file. If the dashboard is being run in a Docker container, then this is the path to the configuration file in a mounted volume. This value is optional. |
 | `DOTNET_RESOURCE_SERVICE_ENDPOINT_URL` | `null` | The gRPC endpoint to which the dashboard connects for its data. If this value is unspecified, the dashboard shows telemetry data but no resource list or console logs. This setting is a shortcut to `Dashboard:ResourceServiceClient:Url`. |
@@ -125,13 +126,16 @@ The resource service client authentication is configured with `Dashboard:Resourc
 
 Telemetry is stored in memory. To avoid excessive memory usage, the dashboard has limits on the count and size of stored telemetry. When a count limit is reached, new telemetry is added, and the oldest telemetry is removed. When a size limit is reached, data is truncated to the limit.
 
-Limits are per-resource. For example, a `MaxLogCount` value of 10,000 configures the dashboard to store up to 10,000 log entries per-resource.
+Telemetry limits have different scopes depending upon the telemetry type:
+
+- `MaxLogCount` and `MaxTraceCount` are shared across resources. For example, a `MaxLogCount` value of 5,000 configures the dashboard to store up to 5,000 total log entries for all resources.
+- `MaxMetricsCount` is per-resource. For example, a `MaxMetricsCount` value of 10,000 configures the dashboard to store up to 10,000 metrics data points per-resource.
 
 | Option | Default Value | Description |
 |--|--|--|
-| `Dashboard:TelemetryLimits:MaxLogCount` | 10,000 | The maximum number of log entries. |
-| `Dashboard:TelemetryLimits:MaxTraceCount` | 10,000 | The maximum number of log traces. |
-| `Dashboard:TelemetryLimits:MaxMetricsCount` | 50,000 | The maximum number of metric data points. |
+| `Dashboard:TelemetryLimits:MaxLogCount` | 10,000 | The maximum number of log entries. Limit is shared across resources. |
+| `Dashboard:TelemetryLimits:MaxTraceCount` | 10,000 | The maximum number of log traces. Limit is shared across resources. |
+| `Dashboard:TelemetryLimits:MaxMetricsCount` | 50,000 | The maximum number of metric data points. Limit is per-resource. |
 | `Dashboard:TelemetryLimits:MaxAttributeCount` | 128 | The maximum number of attributes on telemetry. |
 | `Dashboard:TelemetryLimits:MaxAttributeLength` | `null` | The maximum length of attributes. |
 | `Dashboard:TelemetryLimits:MaxSpanEventCount` | `null` | The maximum number of events on span attributes. |

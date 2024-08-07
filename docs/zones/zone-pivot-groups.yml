@@ -43,4 +43,23 @@ groups:
       title: Visual Studio Code
     - id: dotnet-cli
       title: .NET CLI
-
+- id: resp-host
+  title: RESP Host
+  prompt: Choose a RESP Hosting resource type
+  pivots:
+    - id: redis
+      title: Redis
+    - id: garnet
+      title: Garnet
+    - id: valkey
+      title: Valkey
+- id: unit-testing-framework
+  title: Unit testing framework
+  prompt: Choose a unit testing framework
+  pivots:
+    - id: xunit
+      title: xUnit
+    - id: mstest
+      title: MSTest
+    - id: nunit
+      title: NUnit

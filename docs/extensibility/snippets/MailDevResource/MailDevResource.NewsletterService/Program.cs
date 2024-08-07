@@ -1,9 +1,11 @@
 ﻿using System.Net.Mail;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Add services to the container.
 // <smtp>
@@ -23,28 +25,12 @@ app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
-
 // <subs>
-app.MapPost("/subscribe", async ([FromServices] SmtpClient smtpClient, string email) =>
+app.MapPost("/subscribe", async (SmtpClient smtpClient, string email) =>
 {
     using var message = new MailMessage("newsletter@yourcompany.com", email)
     {
@@ -55,7 +41,7 @@ app.MapPost("/subscribe", async ([FromServices] SmtpClient smtpClient, string em
     await smtpClient.SendMailAsync(message);
 });
 
-app.MapPost("/unsubscribe", async ([FromServices] SmtpClient smtpClient, string email) =>
+app.MapPost("/unsubscribe", async (SmtpClient smtpClient, string email) =>
 {
     using var message = new MailMessage("newsletter@yourcompany.com", email)
     {
@@ -68,8 +54,3 @@ app.MapPost("/unsubscribe", async ([FromServices] SmtpClient smtpClient, string 
 // </subs>
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

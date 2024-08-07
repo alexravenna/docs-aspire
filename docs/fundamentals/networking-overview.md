@@ -1,7 +1,7 @@
 ---
 title: .NET Aspire inner loop networking overview
 description: Learn how .NET Aspire handles networking and service bindings, and how you can use them in your app code.
-ms.date: 04/24/2024
+ms.date: 07/25/2024
 ms.topic: overview
 ---
 
@@ -14,6 +14,7 @@ One of the advantages of developing with .NET Aspire is that it enables you to d
 The inner loop is the process of developing and testing your app locally before deploying it to a target environment. .NET Aspire provides several tools and features to simplify and enhance the networking experience in the inner loop, such as:
 
 - **Launch profiles**: Launch profiles are configuration files that specify how to run your app locally. You can use launch profiles (such as the _launchSettings.json_ file) to define the service bindings, environment variables, and launch settings for your app.
+- **Kestrel configuration**: Kestrel configuration allows you to specify the endpoints that the Kestrel web server listens on. You can configure Kestrel endpoints in your app settings, and .NET Aspire automatically uses these settings to create service bindings.
 - **Service bindings/Endpoint configurations**: Service bindings are the connections between your app and the services it depends on, such as databases, message queues, or APIs. Service bindings provide information such as the service name, host port, scheme, and environment variable. You can add service bindings to your app either implicitly (via launch profiles) or explicitly by calling <xref:Aspire.Hosting.ResourceBuilderExtensions.WithEndpoint%2A>.
 - **Proxies**: .NET Aspire automatically launches a proxy for each service binding you add to your app, and assigns a port for the proxy to listen on. The proxy then forwards the requests to the port that your app listens on, which might be different from the proxy port. This way, you can avoid port conflicts and access your app and services using consistent and predictable URLs.
 
@@ -55,6 +56,25 @@ To specify the **http** and **https** launch profiles, configure the `applicatio
 > If there's no _launchSettings.json_ (or launch profile), there are no bindings by default.
 
 For more information, see [.NET Aspire and launch profiles](launch-profiles.md).
+
+## Kestrel configured endpoints
+
+.NET Aspire supports Kestrel endpoint configuration. For example, consider an _appsettings.json_ file for a project that defines a Kestrel endpoint with the HTTPS scheme and port 7001:
+
+:::code language="json" source="snippets/networking/Networking.Frontend/Networking.Frontend/appsettings.Development.json" highlight="8-14":::
+
+The preceding configuration specifies an `Https` endpoint. The `Url` property is set to `https://*:7001`, which means the endpoint listens on all interfaces on port 7001. For more information, see [Configure endpoints for the ASP.NET Core Kestrel web server](/aspnet/core/fundamentals/servers/kestrel/endpoints).
+
+With the Kestrel endpoint configured, the project should remove any configured `applicationUrl` from the _launchSettings.json_ file.
+
+> [!NOTE]
+> If the `applicationUrl` is present in the _launchSettings.json_ file and the Kestrel endpoint is configured, the app host will throw an exception.
+
+When you add a project resource, there's an overload that lets you specify that the Kestrel endpoint should be used instead of the _launchSettings.json_ file:
+
+:::code source="snippets/networking/Networking.AppHost/Program.KestrelConfiguration.cs" id="kestrel":::
+
+For more information, see <xref:Aspire.Hosting.ProjectResourceBuilderExtensions.AddProject%2A>.
 
 ## Ports and proxies
 
@@ -109,6 +129,9 @@ The preceding diagram depicts the following:
 - The frontend proxy sitting between the web browser and the frontend service, listening on port 5067.
 - The frontend service listening on an environment 65001.
 
+> [!TIP]
+> To avoid an endpoint being proxied, set the `IsProxied` property to `false` when calling the `WithEndpoint` extension method. For more information, see [Endpoint extensions: additional considerations](#additional-considerations).
+
 ## Omit the host port
 
 When you omit the host port, .NET Aspire generates a random port for both host and service port. This is useful when you want to avoid port conflicts and don't care about the host or service port. Consider the following code:
@@ -143,7 +166,7 @@ Consider the following diagram:
 
 ## Endpoint extension methods
 
-Any resource that implements the `IResourceWithEndpoints` interface can use the `WithEndpoint` extension methods. There are several overloads of this extension, allowing you to specify the scheme, container port, host port, environment variable name, and whether the endpoint is proxied.
+Any resource that implements the <xref:Aspire.Hosting.ApplicationModel.IResourceWithEndpoints> interface can use the `WithEndpoint` extension methods. There are several overloads of this extension, allowing you to specify the scheme, container port, host port, environment variable name, and whether the endpoint is proxied.
 
 There's also an overload that allows you to specify a delegate to configure the endpoint. This is useful when you need to configure the endpoint based on the environment or other factors. Consider the following code:
 
@@ -157,3 +180,26 @@ builder.Services.AddHttpClient<WeatherApiClient>(
 ```
 
 The `Uri` is constructed using the `admin` endpoint name prefixed with the `_` sentinel. This is a convention to indicate that the `admin` segment is the endpoint name belonging to the `apiservice` service. For more information, see [.NET Aspire service discovery](../service-discovery/overview.md).
+
+### Additional considerations
+
+When calling the `WithEndpoint` extension method, the `callback` overload exposes the raw <xref:Aspire.Hosting.ApplicationModel.EndpointAnnotation>, which allows the consumer to customize many aspects of the endpoint.
+
+The `AllocatedEndpoint` property allows you to get or set the endpoint for a service. The `IsExternal` and `IsProxied` properties determine how the endpoint is managed and exposed: `IsExternal` decides if it should be publicly accessible, while `IsProxied` ensures DCP manages it, allowing for internal port differences and replication.
+
+> [!TIP]
+> If you're hosting an external executable that runs its own proxy and encounters port binding issues due to DCP already binding the port, try setting the `IsProxied` property to `false`. This prevents DCP from managing the proxy, allowing your executable to bind the port successfully.
+
+The `Name` property identifies the service, whereas the `Port` and `TargetPort` properties specify the desired and listening ports, respectively.
+
+For network communication, the `Protocol` property supports **TCP** and **UDP**, with potential for more in the future, and the `Transport` property indicates the transport protocol (**HTTP**, **HTTP2**, **HTTP3**). Lastly, if the service is URI-addressable, the `UriScheme` property provides the URI scheme for constructing the service URI.
+
+For more information, see the available properties of the [EndpointAnnotation properties](/dotnet/api/aspire.hosting.applicationmodel.endpointannotation#properties).
+
+## Endpoint filtering
+
+All .NET Aspire project resource endpoints follow a set of default heuristics. Some endpoints are included in `ASPNETCORE_URLS` at runtime, some are published as `HTTP/HTTPS_PORTS`, and some configurations are resolved from Kestrel configuration. Regardless of the default behavior, you can filter the endpoints that are included in environment variables by using the <xref:Aspire.Hosting.ProjectResourceBuilderExtensions.WithEndpointsInEnvironment%2A> extension method:
+
+:::code source="snippets/networking/Networking.AppHost/Program.EndpointFilter.cs" id="filter":::
+
+The preceding code adds a default HTTPS endpoint, as well as an `admin` endpoint on port 19227. However, the `admin` endpoint is excluded from the environment variables. This is useful when you want to expose an endpoint for internal use only.

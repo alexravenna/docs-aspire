@@ -1,7 +1,7 @@
 ---
 title: .NET Aspire PostgreSQL component
 description: This article describes the .NET Aspire PostgreSQL component.
-ms.date: 06/05/2024
+ms.date: 07/17/2024
 ms.topic: how-to
 ---
 
@@ -11,7 +11,7 @@ In this article, you learn how to use the .NET Aspire PostgreSQL component. The 
 
 ## Get started
 
-To get started with the .NET Aspire PostgreSQL component, install the [Aspire.Npgsql](https://www.nuget.org/packages/Aspire.Npgsql) NuGet package.
+To get started with the .NET Aspire PostgreSQL component, install the [Aspire.Npgsql](https://www.nuget.org/packages/Aspire.Npgsql) NuGet package in the consuming client project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -85,6 +85,8 @@ And then the connection string will be retrieved from the `ConnectionStrings` co
   }
 }
 ```
+
+For more information, see the [ConnectionString](https://www.npgsql.org/doc/connection-string-parameters.html).
 
 ### Use configuration providers
 

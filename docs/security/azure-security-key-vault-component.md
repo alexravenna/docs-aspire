@@ -2,7 +2,7 @@
 title: .NET Aspire Azure Key Vault component
 description: Lean about the .NET Aspire Azure Key Vault component.
 ms.topic: how-to
-ms.date: 06/05/2024
+ms.date: 07/25/2024
 ---
 
 # .NET Aspire Azure Key Vault component
@@ -11,7 +11,7 @@ In this article, you learn how to use the .NET Aspire Azure Key Vault component.
 
 ## Get started
 
-To get started with the .NET Aspire Azure Key Vault component, install the [Aspire.Azure.Security.KeyVault](https://www.nuget.org/packages/Aspire.Azure.Security.KeyVault) NuGet package.
+To get started with the .NET Aspire Azure Key Vault component, install the [Aspire.Azure.Security.KeyVault](https://www.nuget.org/packages/Aspire.Azure.Security.KeyVault) NuGet package in the consuming client project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -32,6 +32,8 @@ For more information, see [dotnet add package](/dotnet/core/tools/dotnet-add-pac
 
 ## Example usage
 
+THe following sections describe various example usages.
+
 ### Add secrets to configuration
 
 In the _:::no-loc text="Program.cs":::_ file of your component-consuming project, call the <xref:Microsoft.Extensions.Hosting.AspireKeyVaultExtensions.AddAzureKeyVaultSecrets%2A> extension to add the secrets in the Azure Key Vault to the application's Configuration. The method takes a connection name parameter.
@@ -50,7 +52,7 @@ public class ExampleService(IConfiguration configuration)
 }
 ```
 
-### Use SecretClient
+### Use `SecretClient`
 
 Alternatively, you can use a `SecretClient` to retrieve the secrets on demand. In the _:::no-loc text="Program.cs":::_ file of your component-consuming project, call the <xref:Microsoft.Extensions.Hosting.AspireKeyVaultExtensions.AddAzureKeyVaultClient%2A> extension to register a `SecretClient` for use via the dependency injection container.
 
@@ -69,7 +71,7 @@ public class ExampleService(SecretClient client)
 
 ## App host usage
 
-To add Azure Key Vault hosting support to your <xref:Aspire.Hosting.IDistributedApplicationBuilder>, install the [Aspire.Hosting.Azure.KeyVault](https://www.nuget.org/packages/Aspire.Hosting.Azure.KeyVault) NuGet package.
+To add Azure Key Vault hosting support to your <xref:Aspire.Hosting.IDistributedApplicationBuilder>, install the [Aspire.Hosting.Azure.KeyVault](https://www.nuget.org/packages/Aspire.Hosting.Azure.KeyVault) NuGet package in the [app host](xref:aspire/app-host) project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -98,6 +100,8 @@ var secrets = builder.ExecutionContext.IsPublishMode
 builder.AddProject<Projects.ExampleProject>()
        .WithReference(secrets)
 ```
+
+The preceding code conditionally adds the Azure Key Vault resource to the project based on the execution context. If the app host is executing in publish mode, the resource is added otherwise the connection string to an existing resource is added.
 
 ## Configuration
 
@@ -137,6 +141,9 @@ builder.AddAzureKeyVaultSecrets(
     "secrets",
     static settings => settings.VaultUri = new Uri("YOUR_VAULTURI"));
 ```
+
+> [!TIP]
+> The `AddAzureKeyVaultSecrets` API name has caused a bit of confusion. The method is used to configure the `SecretClient` and not to add secrets to the configuration.
 
 You can also set up the <xref:Azure.Security.KeyVault.Secrets.SecretClientOptions> using `Action<IAzureClientBuilder<SecretClient, SecretClientOptions>>` delegate, the second parameter of the `AddAzureKeyVaultSecrets` method. For example to set the <xref:Azure.Security.KeyVault.Keys.KeyClientOptions.DisableChallengeResourceVerification?displayProperty=nameWithType> ID to identify the client:
 

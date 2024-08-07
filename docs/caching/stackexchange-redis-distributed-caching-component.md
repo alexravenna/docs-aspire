@@ -2,7 +2,8 @@
 title: .NET Aspire Stack Exchange Redis distributed caching component
 description: This article describes the .NET Aspire Stack Exchange Redis distributed caching component features and capabilities
 ms.topic: how-to
-ms.date: 06/11/2024
+ms.date: 07/23/2024
+zone_pivot_groups: resp-host
 ---
 
 # .NET Aspire Stack Exchange Redis distributed caching component
@@ -11,7 +12,7 @@ In this article, you learn how to use the .NET Aspire Stack Exchange Redis distr
 
 ## Get started
 
-To get started with the .NET Aspire Stack Exchange Redis distributed caching component, install the [Aspire.StackExchange.Redis.DistributedCaching](https://www.nuget.org/packages/Aspire.StackExchange.Redis.DistributedCaching) NuGet package.
+To get started with the .NET Aspire Stack Exchange Redis distributed caching component, install the [Aspire.StackExchange.Redis.DistributedCaching](https://www.nuget.org/packages/Aspire.StackExchange.Redis.DistributedCaching) NuGet package in the consuming client project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -49,22 +50,21 @@ public class ExampleService(IDistributedCache cache)
 
 ## App host usage
 
+:::zone pivot="redis"
+
 [!INCLUDE [redis-app-host](includes/redis-app-host.md)]
 
-```csharp
-var builder = DistributedApplication.CreateBuilder(args);
+:::zone-end
+:::zone pivot="garnet"
 
-var redis = builder.AddRedis("cache");
+[!INCLUDE [garnet-app-host](includes/garnet-app-host.md)]
 
-builder.AddProject<Projects.ExampleProject>()
-       .WithReference(redis)
-```
+:::zone-end
+:::zone pivot="valkey"
 
-The <xref:Aspire.Hosting.ResourceBuilderExtensions.WithReference%2A> method configures a connection in the `ExampleProject` project named `cache`. In the _:::no-loc text="Program.cs":::_ file of `ExampleProject`, the Redis connection can be consumed using:
+[!INCLUDE [valkey-app-host](includes/valkey-app-host.md)]
 
-```csharp
-builder.AddRedisDistributedCache("cache");
-```
+:::zone-end
 
 ## Configuration
 

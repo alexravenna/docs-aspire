@@ -2,7 +2,7 @@
 title: .NET Aspire NATS component
 description: Learn how to use the .NET Aspire NATS component to send logs and traces to a NATS Server.
 ms.topic: how-to
-ms.date: 05/14/2024
+ms.date: 07/17/2024
 ---
 
 # .NET Aspire NATS component
@@ -16,7 +16,7 @@ In this article, you learn how to use the .NET Aspire NATS component to send log
 
 ## Get started
 
-To get started with the .NET Aspire NATS component, install the [Aspire.NATS.Net](https://www.nuget.org/packages/Aspire.NATS.Net) NuGet package.
+To get started with the .NET Aspire NATS component, install the [Aspire.NATS.Net](https://www.nuget.org/packages/Aspire.NATS.Net) NuGet package in the consuming client project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -54,7 +54,7 @@ public class ExampleService(INatsConnection client)
 
 ## App host usage
 
-To model the Nats resource in the app host, install the [Aspire.Hosting.Nats](https://www.nuget.org/packages/Aspire.Hosting.Nats) NuGet package.
+To model the Nats resource in the app host, install the [Aspire.Hosting.Nats](https://www.nuget.org/packages/Aspire.Hosting.Nats) NuGet package in the [app host](xref:aspire/app-host) project.
 
 ### [.NET CLI](#tab/dotnet-cli)
 
@@ -172,5 +172,5 @@ The .NET Aspire NATS component emits the following tracing activities:
 
 ## See also
 
-- [NATS.Net quickstart](https://nats-io.github.io/nats.net.v2/documentation/intro.html?tabs=core-nats)
+- [NATS.Net quickstart](https://nats-io.github.io/nats.net/documentation/intro.html?tabs=core-nats)
 - [NATS component README](https://github.com/dotnet/aspire/tree/main/src/Components/README.md)

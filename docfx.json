@@ -103,10 +103,21 @@
         "docs/**/*.*": "csharp"
       },
       "author": {
-        "docs/**/*.*": "IEvangelist"
+        "docs/**/*.*": "IEvangelist",
+        "docs/database/**/*.*": "CamSoper",
+        "docs/storage/**/*.*": "CamSoper",
+        "docs/messaging/**/*.*": "CamSoper",
+        "docs/deployment/**/*.*": "CamSoper"
       },
       "ms.author": {
-        "docs/**/*.*": "dapine"
+        "docs/**/*.*": "dapine",
+        "docs/database/**/*.*": "casoper",
+        "docs/storage/**/*.*": "casoper",
+        "docs/messaging/**/*.*": "casoper",
+        "docs/deployment/**/*.*": "casoper"
+      },
+      "ms.collection": {
+        "docs/azureai/**/*.md": "ce-skilling-ai-copilot"
       },
       "titleSuffix": {
         "docs/**/**.md": ".NET Aspire"
@@ -146,10 +157,12 @@
           "Docker",
           "Dockerfile",
           "EF Core",
+          "Elasticsearch",
           "Entity Framework Core",
           "Git",
           "GitHub",
           "JSON",
+          "Keycloak",
           "Kubernetes",
           "Linux",
           "localhost",
